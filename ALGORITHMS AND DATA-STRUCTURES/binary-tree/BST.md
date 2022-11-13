@@ -129,14 +129,14 @@ class BinarySearchTree:
             # BST is not empty
             self.insert_node(value, self.root)
 
-    def insert_node(data, node):
+    def insert_node(self, data, node):
         '''internal method which insert new node recursively'''
         if data < node.value:
             # we check the left subtree
             if node.left is not None:
                 # the current node has a left child
                 # then we continue traversing the tree
-                node.insert_node(data, node.left)
+                self.insert_node(data, node.left)
             else:
                 # we reach a leaf node so we insert the new one
                 node.left = Node(data, node)
@@ -145,13 +145,13 @@ class BinarySearchTree:
             if node.right is not None:
                 # the current node has a right child
                 # then we continue traversing the tree
-                node.insert_node(data, node.right)
+                self.insert_node(data, node.right)
             else:
                 # we reach a leaf node so we insert the new one
                 node.right = Node(data, node)
 
     def delete(self, value):
-        if self.root  is not None:
+        if self.root is not None:
             self.remove_node(value, self.root)
 
     def remove_node(self, data, node):
@@ -161,14 +161,73 @@ class BinarySearchTree:
             return
         # 1. search for the node to be removed
         if data < node.value:
-            node.remove_node(data, node.left)
+            self.remove_node(data, node.left)
         elif data > node.value:
-            node.remove_node(data, node.right)
+            self.remove_node(data, node.right)
         else:
             # we found the node
             # case 1: we are dealing with a leaf node
-            
+            if node.left is None and node.right is None:
+                # get reference for parent node
+                parent = node.parent
+                # if parent node is not root and left child is the leaf node
+                if parent is not None and parent.left == node:
+                    # notify parent (pointing to null)
+                    parent.left = None
+                elif parent is not None and parent.right == node:
+                    # notify parent (pointing to null)
+                    parent.right = None
+                # node that we want to remove is root node
+                elif parent is None:
+                    self.root = None
+                # once we notify to parent node we delete the item
+                del node
 
+            # case 2: we are dealing with parent node with single child
+            elif node.left is not None and node.right is None:
+                # get reference for parent node
+                parent = node.parent
+
+                if parent is not None and parent.left == node:
+                    # notify parent linking the left child
+                    parent.left = node.left
+                elif parent is not None and parent.right == node:
+                    # notify parent linking the left child
+                    parent.right = node.left
+                elif parent is None:
+                    self.root = node.left
+                # once we notify to parent node we delete the item
+                del node
+            
+            elif node.right is not None and node.left is None:
+                # get reference for parent node
+                parent = node.parent
+
+                if parent is not None and parent.left == node:
+                    # notify parent linking the right child
+                    parent.left = node.right
+                elif parent is not None and parent.right == node:
+                    # notify parent linking the right child
+                    parent.right = node.right
+                elif parent is None:
+                    self.root = node.right
+                # once we notify to parent node we delete the item
+                del node
+
+            # case 3: we are dealing with parent with two childs
+            else:
+                # search for the node's predecessor (max value in left subtree)
+                predecessor = self.get_predecessor(node.left)
+                # swap values: node <> predecessor
+                node.value, predecessor.value = predecessor.value, node.value
+                # then node is now at predecessor position, so we remove it
+                self.remove_node(data, predecessor)
+            
+    def get_predecessor(self, node):
+        '''returns the predecessor of node'''
+        if node.right:
+            return self.get_predecessor(node.right)
+        return node
 
     def get_min(self):
         '''return the minimum value in the BST'''
@@ -178,7 +237,7 @@ class BinarySearchTree:
     def get_min_value(self, node):
         '''get the left most node in the BST recursively'''
         if node.left is not None:
-            return node.get_min_value(node.left)
+            return self.get_min_value(node.left)
         else:
             return node.value
 
@@ -190,7 +249,7 @@ class BinarySearchTree:
     def get_max_value(self, node):
         '''get the right most node in the BST recursively'''
         if node.right is not None:
-            return node.get_max_value(node.right)
+            return self.get_max_value(node.right)
         else:
             return node.value
 
@@ -205,12 +264,12 @@ class BinarySearchTree:
         '''
         # we start at the left subtree (calling it until reach a leaf node)
         if node.left is not None:
-            node.traverse_in_order(node.left)
+            self.traverse_in_order(node.left)
         # oncce we reach a leaf node we print the value
         # notice that left > root > right refers to three nodes
         # left child - parent - right child, where parent = root
         print(node.value)
         # we continue with the right subtree (calling it until reach a leaf node)
         if node.right is not None:
-            node.traverse_in_order(node.right)
-
+            self.traverse_in_order(node.right)
+```
